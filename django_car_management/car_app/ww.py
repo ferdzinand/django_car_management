@@ -1,14 +1,14 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from .models import Car
-from .forms import CarForm
-from django.core.paginator import Paginator
-from django.db.models import F
-from django.http import JsonResponse, HttpRequest,HttpResponse
-from django.template.loader import render_to_string
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from django.db import connection
-import sqlite3
+# from django.shortcuts import render, get_object_or_404, redirect
+# from .models import Car
+# from .forms import CarForm
+# from django.core.paginator import Paginator
+# from django.db.models import F
+# from django.http import JsonResponse, HttpRequest,HttpResponse
+# from django.template.loader import render_to_string
+# from django.db.models.signals import post_save
+# from django.dispatch import receiver
+# from django.db import connection
+# import sqlite3
 
 
 # Car_List
