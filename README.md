@@ -1,0 +1,1 @@
+# django_car_management
