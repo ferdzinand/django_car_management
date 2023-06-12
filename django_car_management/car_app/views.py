@@ -67,13 +67,15 @@ def car_delete(request, pk):
 
 #FUNCTIONS
 
+# Movement of cars
 def update_position(request):
     if request.method == 'POST':
         car_id = request.POST.get('item_id')
         reference_item_id = request.POST.get('reference_item_id')
         
-        print('car_id:'+car_id)
-        print('ref_id:'+reference_item_id)
+        #check current and reference id
+#         print('car_id:'+car_id)
+#         print('ref_id:'+reference_item_id)
 
         try:
             car = Car.objects.get(pk=car_id)
@@ -81,20 +83,23 @@ def update_position(request):
 
             # Swap positions of the items
             car.position, reference_item.position = reference_item.position, car.position
-            car.save()
-            reference_item.save()
-
+            
+            #chect new position value
+#             print(car.position)
+#             print(reference_item.position)
+            
+            if car.position==reference_item.position :
+                car.position+.5
+                car.save()
+            else :
+                car.save()
+                reference_item.save()
+            
             return HttpResponse(status=200)
         except (Car.DoesNotExist, ValueError):
-            return HttpResponse(status=400)
+            return HttpResponse(status=400),
     else:
         return HttpResponse(status=405)
-
-
-
-
-
-
 
 # FUNCTIONS 
 # def move_up(request,pk):    
