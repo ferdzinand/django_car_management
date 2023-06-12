@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+    <div class="container">
+        <h1>Car Management</h1>
+        <!-- Car List -->
+        
+        <div class="card" style="width:100%; position:relative; z-index:1;">
+            <div class="card-body">
+                <form method="get">
+                    <div class="row">
+
+                        <div class="col-md-2">
+                         <h3 class="card-title">Car List</h3>
+                        </div>
+                        <div class="col-md-1">
+                            <a style="padding-top:2px;">Color Filter:</a>
+                           </div>
+                        <div class="col-md-3">
+                            <select id="color-select" name="color" class="form-control">
+                                <option value="">All</option>
+                                {% for color in colors %}
+                                    <option value="{{ color }}" {% if color == selected_color %}selected{% endif %}>{{ color|capfirst }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="submit" class="btn btn-primary">Filter</button>
+            
+                            <button type="button" onclick="window.location.href='{% url 'car_new'%}'" class="btn btn-success">Add new Entry</button>
+                        </div>
+                      </div>
+                </form>
+            </div>
+        </div>
+        <br>
+        <div class="card d-flex align-items-center justify-content-center "style="overflow:auto;">
+            <div class="card-body">
+                <table class="table" id="car_table">
+                    <thead >
+                        <tr>
+                            <th>Origin</th>
+                            <th>ID Number</th>
+                            <th>Model</th>
+                            <th>Color</th>
+                            <th>Year</th>
+                            <th>Position</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Loop through cars and display each car as a table row -->
+                        {% for car in cars %}
+                        <tr data-item-id="{{car.pk}}"> 
+                            <td>{{ car.origin }}</td>
+                            <td>{{ car.pk }}</td>
+                            <td>{{ car.model }}</td>
+                            <td>{{ car.color }}</td>
+                            <td>{{ car.year }}</td>
+                            <td>{{ car.position }}</td>
+                            <td>
+                                <!-- Add buttons for editing, deleting, and moving cars -->
+                                <!--href='{% url 'car_edit' pk=car.pk %}'-->
+                                <a 
+                                     id="{{car.pk}}"
+                                     href='{% url 'car_edit' pk=car.pk %}'
+                                     class="btn btn-primary"
+                                     data-toggle="modal" 
+                                     data-target="#carModal">Edit</a>
+                                <a href=href='{% url 'car_delete' pk=car.pk %}'
+                                    class="btn btn-danger">Delete</a>
+                                <a 
+                                    class="move-up btn btn-secondary"  data-item-id="{{ car.pk }}">Move Up</a>
+                                <a 
+                                    class="move-down btn btn-secondary" data-item-id="{{ car.pk }}">Move Down</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+                <!-- Pagination -->
+                <nav aria-label="Car list navigation fixed" class="fixed-bottom">
+                    <ul class="pagination">
+                        {% if cars.has_previous %}
+                            <li class="page-item"><a class="page-link" href="?color={{ selected_color }}&page={{ cars.previous_page_number }}">Previous</a></li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                        {% endif %}
+                        {% for page in cars.paginator.page_range %}
+                            {% if page == cars.number %}
+                                <li class="page-item active"><span class="page-link">{{ page }}</span></li>
+                            {% else %}
+                                <li class="page-item"><a class="page-link" href="?color={{ selected_color }}&page={{ page }}">{{ page }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        {% if cars.has_next %}
+                            <li class="page-item"><a class="page-link" href="?color={{ selected_color }}&page={{ cars.next_page_number }}">Next</a></li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">Next</span></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var table = document.getElementById('car_table');
+
+            table.addEventListener('click', function (event) {
+                if (event.target.matches('.move-up')) {
+                    var row = event.target.closest('tr');
+                    var itemId = row.dataset.itemId;
+                    var prevRow = row.previousElementSibling;
+
+                    if (prevRow) {
+                        var prevItemId = prevRow.dataset.itemId;
+
+                        // Send AJAX request to update row position
+                        updateRowPosition(itemId, prevItemId);
+                    }
+                } else if (event.target.matches('.move-down')) {
+                    var row = event.target.closest('tr');
+                    var itemId = row.dataset.itemId;
+                    var nextRow = row.nextElementSibling;
+
+                    if (nextRow) {
+                        var nextItemId = nextRow.dataset.itemId;
+
+                        // Send AJAX request to update row position
+                        updateRowPosition(itemId, nextItemId);
+                    }
+                }
+            });
+            function getCookie(name) {
+                var cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                  var cookies = document.cookie.split(';');
+                  for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    // Check if the cookie name matches
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                      cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                      break;
+                    }
+                  }
+                }
+                return cookieValue;
+              }
+
+            // Function to send AJAX request and update row position
+            function updateRowPosition(itemId, referenceItemId) {
+                var xhr = new XMLHttpRequest();
+                var url = '/update_position/';
+                var params = 'item_id=' + itemId + '&reference_item_id=' + referenceItemId;
+              
+                xhr.open('POST', url, true);
+                xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+              
+                // Add CSRF token to request headers
+                var csrftoken = getCookie('csrftoken');
+                xhr.setRequestHeader('X-CSRFToken', csrftoken);
+              
+                xhr.onload = function () {
+                  if (xhr.status === 200) {
+                    var row = document.querySelector('tr[data-item-id="' + itemId + '"]');
+                    var referenceRow = document.querySelector('tr[data-item-id="' + referenceItemId + '"]');
+              
+                    if (row && referenceRow) {
+                      referenceRow.parentNode.insertBefore(row, referenceRow);
+                    }
+                  } else {
+                    alert('An error occurred while updating row position.');
+                  }
+                };
+              
+                xhr.onerror = function () {
+                  alert('An error occurred while updating row position.');
+                };
+              
+                xhr.send(params);
+              }
+            });
+    </script>
+
+
+  {% endblock %}

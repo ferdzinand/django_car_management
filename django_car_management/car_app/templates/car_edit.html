@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  
+  <div class="row bg-dark">
+    <h1 style="color:white">{% if form.instance.pk %}Edit{% else %}New{% endif %} Car</h1>
+  </div>
+</br>
+  <div class="row">
+    <form method="post">
+
+      <div class='col'>
+        <button class="btn btn-primary" type="submit">Save</button>
+        <button class="btn btn-secondary text-white"  onclick="window.location.href='{% url 'car_list'%}'">Return</button>
+        <div class="row bg-secondary text-white">
+        </br>
+         <h2>{% csrf_token %}<h2>
+         {{ form.as_p }}
+      </div>
+
+     
+
+     </div> 
+      
+    </form>
+  </div>
+
+{% endblock %}

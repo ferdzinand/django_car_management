@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>Details</h1>
+  <h2>
+    <button class="btn btn-success" onclick="window.location.href='{% url 'car_list'%}';"> Return To Main Page</button>
+    <button class="btn btn-warning" onclick="window.location.href='{% url 'car_edit' pk=car.pk %}';"> Edit</button>
+    <button class="btn btn-danger" onclick="window.location.href='{% url 'car_delete' pk=car.pk %}';">Delete </button>
+    
+    <table class="table table-dark">
+      <tr><td>Origin</td><td>{{  car.origin }}</td></tr>
+      <tr><td>Brand:</td><td>{{  car.brand }}</td></tr>
+      <tr><td>Model:</td><td>{{  car.model }}</td></tr>
+      <tr><td>Color:</td><td>{{  car.color }}</td></tr>
+      <tr><td>Year:</td><td>{{  car.year }}</td></tr>
+    </table>
+  </h2>
+
+{% endblock %}
